@@ -1,4 +1,4 @@
-# ConditionalAccessPolicyReport
+# AzureSAMLApplication
 PowerShell Script used to create a SAML Application in Azure AD
 
 # DESCRIPTION
