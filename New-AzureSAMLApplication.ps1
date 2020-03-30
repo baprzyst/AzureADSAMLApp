@@ -11,16 +11,20 @@ param(
 
 
 
+$curAzureContext = Get-AzureRmContext
+
+if($curAzureContext -eq $null) {
+
+
 $rmAccount = Add-AzureRmAccount
 
 
 $curAzureContext = Get-AzureRmContext
 
+
 $tenanId = $curAzureContext.Tenant.Id
 
 $accountId = $curAzureContext.Account.Id
-
-Connect-AzureAD -TenantId $tenanId -AccountId $accountId
 
 
 
@@ -28,13 +32,31 @@ Connect-AzureAD -TenantId $tenanId -AccountId $accountId
 $TokenEndpoint = {https://login.windows.net/{0}/oauth2/token} -f $TenantId
 $ARMResource = "74658136-14ec-4630-ad9b-26e160ff0fc6";
 
-$acc = $rmAccount.Context.TokenCache.ReadItems() | Where { $_.DisplayableId -eq $accountId }
+$acc = $rmAccount.Context.TokenCache.ReadItems() | Where { $_.DisplayableId -eq $accountId -and $_.TenantId -eq $TenantId }
+
+}else{
+
+$rmAccount = Get-AzureRmContext
+    
+$tenanId = $curAzureContext.Tenant.Id
+
+$accountId = $curAzureContext.Account.Id
+
+
+
+
+$TokenEndpoint = {https://login.windows.net/{0}/oauth2/token} -f $TenantId
+$ARMResource = "74658136-14ec-4630-ad9b-26e160ff0fc6";
+
+$acc = $rmAccount.TokenCache.ReadItems() | Where { $_.DisplayableId -eq $accountId -and $_.TenantId -eq $TenantId }
+
+}
 
 
 $Body = @{
         'resource'= $ARMResource
         'grant_type' = 'refresh_token'
-        'refresh_token' = $acc[2].RefreshToken
+        'refresh_token' = $acc[0].RefreshToken
 
 }
 
